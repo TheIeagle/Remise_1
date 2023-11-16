@@ -12,6 +12,22 @@ def analyser_commande():
     parser.add_argument('symbole', nargs='+', help='Nom d\'un symbole boursier')
     return parser.parse_args()
 
+def produire_historique(symbole, debut, fin, valeur):
+    url = f'https://pax.ulaval.ca/action/{symbole}/historique/'
+    params = {'début': debut.strftime('%Y-%m-%d'), 'fin': fin.strftime('%Y-%m-%d')}
+    
+    reponse = requests.get(url=url, params=params)
+    donnees = json.loads(reponse.text)
+    
+    historique = donnees['historique']
+    
+    resultats = [(datetime.strptime(date, '%Y-%m-%d').date(), day_data[valeur]) 
+                 for date, day_data in historique.items() if valeur in day_data]
+    
+    resultats.sort(key=lambda x: x[0])
+    
+    return resultats
+
 if __name__ == '__main__':
     args = analyser_commande()
     print(args)
