@@ -18,6 +18,9 @@ def produire_historique(symbole, debut, fin, valeur):
     
     reponse = requests.get(url=url, params=params)
     donnees = json.loads(reponse.text)
+
+    if 'message d\'erreur' in donnees:
+        raise ValueError(donnees['message d\'erreur'])
     
     historique = donnees['historique']
     
