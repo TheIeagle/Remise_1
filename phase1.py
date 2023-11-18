@@ -33,4 +33,17 @@ def produire_historique(symbole, debut, fin, valeur):
 
 if __name__ == '__main__':
     args = analyser_commande()
-    print(args)
+    
+    for symbole in args.symbole:
+        if not args.debut:
+            args.debut = args.fin
+        if not args.fin:
+            args.fin = datetime.now().date()
+        
+        historique = produire_historique(symbole, args.debut, args.fin, args.valeur)
+        
+       
+        print(f'titre={symbole}: valeur={args.valeur}, début=datetime.date({args.debut.year}, {args.debut.month}, {args.debut.day}), fin=datetime.date({args.fin.year}, {args.fin.month}, {args.fin.day})')
+
+        historique_formatte = [(f'datetime.date({d.year}, {d.month}, {d.day})', v) for d, v in historique]
+        print(historique_formatte)
