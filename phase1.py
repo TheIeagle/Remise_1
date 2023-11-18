@@ -10,7 +10,20 @@ def analyser_commande():
     parser.add_argument('-v', '--valeur', type=str, choices=['fermeture', 'ouverture', 'min', 'max', 'volume'],
                         default='fermeture', help='La valeur désirée (par défaut: fermeture)')
     parser.add_argument('symbole', nargs='+', help='Nom d\'un symbole boursier')
-    return parser.parse_args()
+
+    args = parser.parse_args()
+
+    for symbole in args.symbole:
+        if not args.debut:
+            args.debut = args.fin
+        if not args.fin:
+            args.fin = datetime.now().date()
+        
+        historique = produire_historique(symbole, args.debut, args.fin, args.valeur)
+        
+        print(f'titre={symbole}: valeur={args.valeur}, début=datetime.date({args.debut.year}, {args.debut.month}, {args.debut.day}), fin=datetime.date({args.fin.year}, {args.fin.month}, {args.fin.day})')
+        historique_formatte = [(f'datetime.date({d.year}, {d.month}, {d.day})', v) for d, v in historique]
+        print(historique_formatte)
 
 def produire_historique(symbole, debut, fin, valeur):
     url = f'https://pax.ulaval.ca/action/{symbole}/historique/'
@@ -18,7 +31,7 @@ def produire_historique(symbole, debut, fin, valeur):
     
     reponse = requests.get(url=url, params=params)
     donnees = json.loads(reponse.text)
-
+    
     if 'message d\'erreur' in donnees:
         raise ValueError(donnees['message d\'erreur'])
     
@@ -31,19 +44,5 @@ def produire_historique(symbole, debut, fin, valeur):
     
     return resultats
 
-if __name__ == '__main__':
-    args = analyser_commande()
-    
-    for symbole in args.symbole:
-        if not args.debut:
-            args.debut = args.fin
-        if not args.fin:
-            args.fin = datetime.now().date()
-        
-        historique = produire_historique(symbole, args.debut, args.fin, args.valeur)
-        
-       
-        print(f'titre={symbole}: valeur={args.valeur}, début=datetime.date({args.debut.year}, {args.debut.month}, {args.debut.day}), fin=datetime.date({args.fin.year}, {args.fin.month}, {args.fin.day})')
 
-        historique_formatte = [(f'datetime.date({d.year}, {d.month}, {d.day})', v) for d, v in historique]
-        print(historique_formatte)
+analyser_commande()
